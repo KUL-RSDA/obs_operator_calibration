@@ -23,7 +23,7 @@ module load cluster/genius/centos7
 module load matlab
 #module load matlab
 
-path_script=/data/leuven/314/vsc31402/GIT_REPO/WCM_CALI_main/
+path_script=/data/leuven/314/vsc31402/obs_operator_calibration/
 script=CalWCM_main_PAR_CPU.m
 exp_option=po_ol_hymap_irr
 tag=q_irr
@@ -49,7 +49,7 @@ if [ $N_cpu -gt 0 ]; then
    do
           echo "preparing processor $k out of $N_cpu..."
 
-          cd /data/leuven/314/vsc31402/GIT_REPO/WCM_CALI_main/RUN/
+          cd /data/leuven/314/vsc31402/obs_operator_calibration/RUN/
 
           ./replace.pl $IO_file $IOO_file PAR_CPU $k
 

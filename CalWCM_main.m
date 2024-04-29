@@ -13,8 +13,8 @@ clear all;
 
 debug = 1;  %0/1 to check and get some display
 
-path_subr = ['/data/leuven/314/vsc31402/GIT_REPO/',...
-             'WCM_CALI_main/subroutines/'];
+path_subr = ['/data/leuven/314/vsc31402/obs_operator_calibration/',...
+             'subroutines/'];
 addpath(path_subr); 
 
 %--------------------------------------------------------------------------                       
