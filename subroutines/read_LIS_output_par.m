@@ -1,6 +1,6 @@
 function [dates, lat_all, lon_all, lat, lon, domain, LIS_ssm_sd, LIS_veg_swe, LIS_obs] = ...
     read_LIS_output_par(path, start_cal_date, end_cal_date, exclude_months,...
-    min_lat, max_lat, min_lon, max_lon, DA_tag, read_obs, cpu, n_cpu, pol)
+    min_lat, max_lat, min_lon, max_lon, DA_tag, read_obs, model, cpu, n_cpu, pol)
 
 % Sara Modanesi & Gabrielle De Lannoy - 13 March 2023 
 % Gabrielle De Lannoy - 15 March 2023:
@@ -12,6 +12,8 @@ function [dates, lat_all, lon_all, lat, lon, domain, LIS_ssm_sd, LIS_veg_swe, LI
 %    - Added optional argument 'pol': 
 %       if not given, then DAOBS filenames without specification of the pol
 %          are read, otherwise, the filenames with VV or VH spec are read.
+% Gabrielle De Lannoy - 08 Oct 2024:
+%    - Updated for output from AquaCrop, added 'model' argument
 %==========================================================================
 
 dtstep   = 86400;
@@ -24,7 +26,7 @@ precision= 'float32';
 F  = 1;
 NaNvalue = -9999.;
 if read_obs == 0
-    LIS_obs = NaNvalue;
+  LIS_obs = NaNvalue;
 end
 pol_tag  = '';
 if exist('pol')
@@ -35,6 +37,11 @@ if exist('pol')
   end
 end
 
+% Weights given to upper soil compartments
+% to obtain surface soil moisture estimates from AquaCrop
+if strcmp(model,'AquaCrop')
+  weights=[0.75 0.15 0.1];
+end
 %--------------------------------------------------------------------------
 
 Ds = datevec(datenum(start_cal_date));
@@ -116,11 +123,23 @@ while (stop~=1)
   t_ind = t_ind + 1;
 
   if strcmp(DA_tag, '.a01')
-      S=ncread(fname,'SoilMoist_tavg');
-      S=S(:,:,1); %first layer
-      LIS_ssm_sd(t_ind,:)=S(domain);
-      S=ncread(fname,'LAI_tavg');
-      LIS_veg_swe(t_ind,:)=S(domain);
+      if ~strcmp(model,'AquaCrop')	   
+        S=ncread(fname,'SoilMoist_tavg');
+        S=S(:,:,1); %first layer
+        LIS_ssm_sd(t_ind,:)=S(domain);
+        S=ncread(fname,'LAI_tavg');
+        LIS_veg_swe(t_ind,:)=S(domain);
+      else
+        S=ncread(fname,'SoilMoist_tavg_1');
+	S1=S(domain);
+	S=ncread(fname,'SoilMoist_tavg_2');
+        S2=S(domain);
+        S=ncread(fname,'SoilMoist_tavg_3');
+        S3=S(domain);
+        LIS_ssm_sd(t_ind,:)=S1*weights(1) + S2*weights(2) + S3*weights(3);
+        S=ncread(fname,'WCMV1V2_tavg');
+        LIS_veg_swe(t_ind,:)=S(domain); 
+      end
   elseif strcmp(DA_tag, '.a02')
       S=ncread(fname,'SnowDepth_inst'); %m
       LIS_ssm_sd(t_ind,:)=S(domain);
