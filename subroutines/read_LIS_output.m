@@ -1,6 +1,6 @@
 function [dates, lat_all, lon_all, lat, lon, domain, LIS_ssm_sd, LIS_veg_swe, LIS_obs] = ...
     read_LIS_output(path, start_cal_date, end_cal_date, exclude_months,...
-    min_lat, max_lat, min_lon, max_lon, DA_tag, read_obs, model, pol)
+    min_lat, max_lat, min_lon, max_lon, DA_tag, read_obs, model, cpu, n_cpu, pol)
 
 % Sara Modanesi & Gabrielle De Lannoy - 13 March 2023 
 % Gabrielle De Lannoy - 15 March 2023:
@@ -14,6 +14,8 @@ function [dates, lat_all, lon_all, lat, lon, domain, LIS_ssm_sd, LIS_veg_swe, LI
 %          are read, otherwise, the filenames with VV or VH spec are read.
 % Gabrielle De Lannoy - 08 Oct 2024:
 %    - Updated for output from AquaCrop, added 'model' argument
+%    - Always able to run per processor in parallel, 
+%      set cpu=1, c_cpu=1 to avoid parallel processing
 %==========================================================================
 
 dtstep   = 86400;
@@ -39,7 +41,7 @@ end
 
 % Weights given to upper soil compartments
 % to obtain surface soil moisture estimates from AquaCrop
-if strcmp(model,'AquaCrop')	
+if strcmp(model,'AquaCrop')
   weights=[0.75 0.15 0.1];
 end
 %--------------------------------------------------------------------------
@@ -96,17 +98,25 @@ while (stop~=1)
     lon_all=ncread(fname,'lon');
     %newer output versions
     if any(size(lat_all)==1) && any(size(lon_all)==1)
-        [lon_all,lat_all]=meshgrid(lon_all,lat_all);
+        [lon_all,lat_all]=meshgrid(lon_all,lat_all);   
         lon_all = lon_all';
         lat_all = lat_all';
     end
     [nx, ny] = size(lat_all); 
     lat_all=lat_all(:);
     lon_all=lon_all(:);
-    
+   
     % Potential domain subset
     [domain, lat, lon] = domain_subset(lat_all, lon_all, ...
     min_lat, max_lat, min_lon, max_lon);    
+
+    % === Further subdomain setting for parallellization
+    start_i = (cpu-1)*floor(length(domain)/n_cpu)+1;
+    end_i   = min([(cpu)*ceil(length(domain)/n_cpu)+1 length(domain)]);
+    domain = domain(start_i:end_i);
+    lat    = lat(start_i:end_i);
+    lon    = lon(start_i:end_i);
+    % ===
 
   end
   t_ind = t_ind + 1;
