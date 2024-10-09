@@ -8,7 +8,9 @@ function [param_0] = D_slope(param_0, DD, ...
 % Optional settings
 %
 % Narrow prior parameter range around estimated D [D-D_plusmin D+D_plusmin]
-D_plusmin = 5;
+D_plusmin = 5; % Bechtold et al. (2022), De Lannoy et al. (2024)
+%D_plusmin = 2; % de Roos et al. (2024)
+
 % Quantile to split the year into low and high vegetation density
 % 0.5 will split it into two parts of six months
 % D will be estimated only for low vegetation period
@@ -45,6 +47,16 @@ if length(find(~isnan(delta_obs_nonan)))>N_min
     % calculate initial value for C based on estimated D and low vegetation season
     condveg = veg_S1AB<veg_threshold;
     param_0.m.C = nanmean(obs_S1AB(condveg)) - param_0.m.D * mean(ssm_S1AB(condveg));
+
+    if 0
+    % FYI: slightly alternative procedure, tested w/ SCE
+    % (Bechtold et al., 2022; de Roos et al., 2024)
+    % --more constrained range in parameter D--
+      pf = polyfit(delta_ssm_nonan, delta_s0_nonan, 1)';
+      param_0.m.D=pf(1);%[db*m3/m3]
+      param_0.r.D=[max([D_min param_0.m.D-D_plusmin]) max([D_min param_0.m.D+D_plusmin])]; %[dB*m3/m3]
+      param_0.m.D = mean(param_0.r.D)
+    end  
 end
 
     
