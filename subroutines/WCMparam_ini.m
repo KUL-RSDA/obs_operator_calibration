@@ -31,12 +31,9 @@ if (theta ~= 37 && r_A_B_to_37)
 end
 
 if strcmp(model,'AquaCrop')    % different range in SM
-    % de Roos et al. (RSE, 2023)	
+    % de Roos et al. (RSE, 2023, JGR Biosciences, 2024)	
     param_0.r.C = [-35. -10.]; %[dB]
     param_0.r.D = [10. 80.];   %[dB*m3/m3]
-    % de Roos et al. (JGR, Biogeosciences, 2024)
-    %param_0.r.C = [-35. -5.]; %[dB]
-    %param_0.r.D = [5. 80.];   %[dB*m3/m3]
 end
 
 end
