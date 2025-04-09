@@ -22,3 +22,7 @@ Optimization algorithms, functionalities to read model output, and WCM.
 
 **3. RUN**
 Directory with example files on how to submit a job in the queue for fast parallel calibration, and combining the output from multiple processors into a single output file.
+
+### Citation
+
+De Lannoy, G. J. M., Bechtold, M., Busschaert, L., Heyvaert, Z., Modanesi, S., Dunmire, D., et al. (2024). Contributions of irrigation modeling, soil moisture and snow data assimilation to high-resolution water budget estimates over the Po basin: Progress towards digital replicas. Journal of Advances in Modeling Earth Systems, 16, e2024MS004433. https://doi.org/10.1029/2024MS004433 
